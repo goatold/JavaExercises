@@ -37,7 +37,7 @@ public class BanffMarathonRunner extends AddressBook {
 			if (runners[i].getTime() < fastesRunner.getTime()) {
 				fastesRunner2 = fastesRunner;
 				fastesRunner = runners[i];
-			} else if (runners[i].getTime() > fastesRunner.getTime()
+			} else if (runners[i].getTime() >= fastesRunner.getTime()
 					&& runners[i].getTime() < fastesRunner2.getTime()) {
 				fastesRunner2 = runners[i];
 			} else if (fastesRunner == fastesRunner2) {
