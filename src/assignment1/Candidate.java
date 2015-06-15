@@ -51,7 +51,7 @@ public class Candidate extends AddressBook {
 	}
 
 	public static ArrayList<Candidate> getElligibleCandidates(Candidate[] cands) {
-		ArrayList<Candidate> eCands = new ArrayList<>();
+		ArrayList<Candidate> eCands = new ArrayList<Candidate>();
 		for (Candidate aCand : cands) {
 			if ((aCand.getGrade() >= 85)
 					|| (aCand.getRegulation() >= 0.5 && ((!aCand
