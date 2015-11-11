@@ -85,7 +85,7 @@ public class TrainTimeTable {
 				ttt.delay(station, minutes);
 			}
 		}
-
+		inp.close();
 	}
 
 }

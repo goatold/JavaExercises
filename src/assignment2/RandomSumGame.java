@@ -59,5 +59,6 @@ public class RandomSumGame {
 				lose++;
 		}
 		System.out.printf("You lost %d times and won %d times", lose, win);
+		inp.close();
 	}
 }

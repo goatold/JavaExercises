@@ -72,6 +72,7 @@ public class RockPaperScissorsLizardSpock {
 		}
 		System.out.printf("Game Over! LastWiner: Player %d\n",
 				agame.getLastWiner());
+		inp.close();
 	}
 
 }
