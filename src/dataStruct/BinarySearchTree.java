@@ -3,165 +3,136 @@ package dataStruct;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class BinarySearchTree<T> {
-	private Comparable<T> data;
-	private BinarySearchTree<T> left;
-	private BinarySearchTree<T> right;
+public class BinarySearchTree<T extends Comparable<T>> {
+	private BSTNode<T> root;
 
-	public BinarySearchTree(){
-		this.data = null;
-		this.left = null;
-		this.right = null;
+	public BinarySearchTree() {
+		this.root = null;
 	}
 
-	public void remove(Comparable<T> data) {
-		if (data == null || this.data == null) return;
-		int comp = this.data.compareTo((T)data);
+	public BSTNode<T> getRoot() {
+		return root;
+	}
+
+	public void remove(T data) {
+		root = remove(root, data);
+	}
+
+	private BSTNode<T> remove(BSTNode<T> root, T data) {
+		if (root == null)
+			return null;
+		int comp = root.compareTo(data);
 		if (comp == 0) {
-			if (left == null && right == null) { 
-				this.data = null;
-				return;
+			if (root.getLeft() == null)
+				return root.getRight();
+			if (root.getRight() == null)
+				return root.getLeft();
+			// find max on left. assuming this tree is in order
+			BSTNode<T> max = root.getLeft();
+			BSTNode<T> maxParent = root;
+			while (max != null && max.getRight() != null) {
+				maxParent = max;
+				max = max.getRight();
 			}
-			if (left == null) {
-				this.data = right.data;
-				this.left = right.left;
-				this.right = right.right;
-			} else if (right == null) {
-				this.data = left.data;
-				this.right = left.right;
-				this.left = left.left;
+			// swap max to root
+			root.setData(max.getData());
+			if (maxParent == root) {
+				root.setLeft(max.getLeft());
 			} else {
-				// find max on left
-				BinarySearchTree<T> max = left;
-				BinarySearchTree<T> maxParent = null;
-				while (max != null && max.right != null) {
-					maxParent = max;
-					max = max.right;
-				}
-				this.data = max.data;
-				if (maxParent == null) {
-					left = max.left;
-				} else {
-					maxParent.right = max.left;
-				}
+				maxParent.setRight(max.getLeft());
 			}
-		} else if (comp > 0 ) {
-			if (this.left == null) return;
-			this.left.remove(data);
-			if (left.data == null) left = null;
-		} else if (comp < 0 ) {
-			if (this.right == null) return;
-			this.right.remove(data);
-			if (right.data == null) right = null;
+		} else if (comp > 0) {
+			root.setLeft(remove(root.getLeft(), data));
+		} else if (comp < 0) {
+			root.setRight(remove(root.getRight(), data));
 		}
+		return root;
 	}
-	
-	public void add(Comparable<T> data) {
-		if (data == null) return;
-		if (this.data == null ) {
-			this.data = data;
+
+	public void add(T data) {
+		root = add(this.root, data);
+	}
+
+	private BSTNode<T> add(BSTNode<T> root, T data) {
+		if (data == null)
+			return root;
+		if (root == null) {
+			return new BSTNode<T>(data);
 		} else {
-			int comp =this.data.compareTo((T)data);
+			int comp = root.getData().compareTo(data);
 			if (comp > 0) {
-				if (this.left == null) this.left = new BinarySearchTree();
-				this.left.add(data);
+				root.setLeft(add(root.getLeft(), data));
 			} else if (comp < 0) {
-				if (this.right == null) this.right = new BinarySearchTree();
-				this.right.add(data);
-			} else if (comp == 0) {
-				this.data = data;
+				root.setRight(add(root.getRight(), data));
 			}
 		}
+		return root;
 	}
-	
+
 	public boolean isBST() {
-		return (left == null && right == null) ||
-				(left == null && right.data.compareTo((T)data) > 0 && right.isBST()) ||
-				(right == null && left.data.compareTo((T)data) < 0 && left.isBST()) ||
-				(left.data.compareTo((T)data) < 0 && left.isBST() && right.data.compareTo((T)data) > 0 && right.isBST());
+		return isBST(root, null, null);
 	}
-	
-	public void visit() {
-		if (data == null) {
-			System.out.printf("Null node\n");
-		} else {
-			System.out.printf("node class:%s, data: %s\n", data.getClass(), data.toString());
-		}
+
+	private boolean isBST(BSTNode<T> root, T min, T max) {
+		if (root == null)
+			return true;
+		if (min != null && root.getData().compareTo(min) <= 0)
+			return false;
+		if (max != null && root.getData().compareTo(max) >= 0)
+			return false;
+		return isBST(root.getRight(), root.getData(), max)
+				&& isBST(root.getLeft(), min, root.getData());
 	}
-	
+
 	public void levelOrderTraverse() {
-		Queue<BinarySearchTree> q = new LinkedList<BinarySearchTree>();
-		if (this.data == null) return;
-		q.add(this);
-		while(!q.isEmpty()) {
-			BinarySearchTree current = q.remove();
+		if (this.root == null)
+			return;
+		Queue<BSTNode<T>> q = new LinkedList<BSTNode<T>>();
+		q.add(this.root);
+		while (!q.isEmpty()) {
+			BSTNode<T> current = q.remove();
 			current.visit();
-			if (current.left != null) q.add(current.left);
-			if (current.right != null) q.add(current.right);
+			if (current.getLeft() != null)
+				q.add(current.getLeft());
+			if (current.getRight() != null)
+				q.add(current.getRight());
 		}
 	}
 
 	public void preOrderTraverse() {
-		if (this.data == null) return;
-		visit();
-		if (left != null) left.preOrderTraverse();
-		if (right != null) right.preOrderTraverse();
+		preOrderTraverse(root);
+	}
+
+	private void preOrderTraverse(BSTNode<T> root) {
+		if (root == null)
+			return;
+		root.visit();
+		preOrderTraverse(root.getLeft());
+		preOrderTraverse(root.getRight());
 	}
 
 	public void inOrderTraverse() {
-		if (this.data == null) return;
-		if (left != null) left.inOrderTraverse();
-		visit();
-		if (right != null) right.inOrderTraverse();
+		inOrderTraverse(root);
+	}
+
+	private void inOrderTraverse(BSTNode<T> root) {
+		if (root == null)
+			return;
+		inOrderTraverse(root.getLeft());
+		root.visit();
+		inOrderTraverse(root.getRight());
 	}
 
 	public void postOrderTraverse() {
-		if (this.data == null) return;
-		if (left != null) left.postOrderTraverse();
-		if (right != null) right.postOrderTraverse();
-		visit();
+		postOrderTraverse(root);
 	}
 
-	/**
-	 * @return the data
-	 */
-	public Comparable<T> getData() {
-		return data;
-	}
-
-	/**
-	 * @param data the data to set
-	 */
-	public void setData(Comparable<T> data) {
-		this.data = data;
-	}
-
-	/**
-	 * @return the left
-	 */
-	public BinarySearchTree<T> getLeft() {
-		return left;
-	}
-
-	/**
-	 * @param left the left to set
-	 */
-	public void setLeft(BinarySearchTree<T> left) {
-		this.left = left;
-	}
-
-	/**
-	 * @return the right
-	 */
-	public BinarySearchTree<T> getRight() {
-		return right;
-	}
-
-	/**
-	 * @param right the right to set
-	 */
-	public void setRight(BinarySearchTree<T> right) {
-		this.right = right;
+	private void postOrderTraverse(BSTNode<T> root) {
+		if (root == null)
+			return;
+		postOrderTraverse(root.getLeft());
+		postOrderTraverse(root.getRight());
+		root.visit();
 	}
 
 	/**
@@ -172,7 +143,11 @@ public class BinarySearchTree<T> {
 		bsti.add(5);
 		bsti.add(9);
 		bsti.add(3);
-		System.out.printf("BST: root %d, left %d, right %d\n", bsti.getData(), bsti.getLeft().getData(), bsti.getRight().getData());
+		System.out.printf("BST: root %d, left %d, right %d\n", bsti.getRoot()
+				.getData(), bsti.getRoot().getLeft().getData(), bsti.getRoot()
+				.getRight().getData());
+		System.out.printf("is BST? %s\n", bsti.isBST());
+		bsti.getRoot().setData(1);
 		System.out.printf("is BST? %s\n", bsti.isBST());
 		BinarySearchTree<Character> bsts = new BinarySearchTree<Character>();
 		bsts.add('j');
@@ -188,15 +163,15 @@ public class BinarySearchTree<T> {
 		bsts.add('e');
 		bsts.add('d');
 		bsts.add('b');
-/*
 		System.out.printf("is BST? %s\n", bsts.isBST());
+
 		System.out.printf("BST: level order traversal\n");
 		bsts.levelOrderTraverse();
 		System.out.printf("BST: preorder traversal\n");
 		bsts.preOrderTraverse();
 		System.out.printf("BST: postorder traversal\n");
 		bsts.postOrderTraverse();
-*/
+
 		System.out.printf("BST: inorder traversal\n");
 		bsts.inOrderTraverse();
 		bsts.remove('j');
@@ -215,6 +190,6 @@ public class BinarySearchTree<T> {
 		bsts.remove('b');
 		System.out.printf("remove b\n");
 		bsts.inOrderTraverse();
-}
+	}
 
 }
