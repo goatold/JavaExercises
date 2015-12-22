@@ -4,6 +4,15 @@ public class BSTNode<T extends Comparable<T>> {
 	private T data;
 	private BSTNode<T> left;
 	private BSTNode<T> right;
+	private int preOrderNub;
+
+	public int getPreOrderNub() {
+		return preOrderNub;
+	}
+
+	public void setPreOrderNub(int preOrderNub) {
+		this.preOrderNub = preOrderNub;
+	}
 
 	public BSTNode(T data) {
 		super();
@@ -36,14 +45,5 @@ public class BSTNode<T extends Comparable<T>> {
 
 	public int compareTo(T data) {
 		return this.data.compareTo(data);
-	}
-
-	public void visit() {
-		if (data == null) {
-			System.out.printf("Null data\n");
-		} else {
-			System.out.printf("data class:%s, data: %s\n", data.getClass(),
-					data.toString());
-		}
 	}
 }

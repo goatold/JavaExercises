@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class BinarySearchTree<T extends Comparable<T>> {
-	private BSTNode<T> root;
+	protected BSTNode<T> root;
 
 	public BinarySearchTree() {
 		this.root = null;
@@ -87,11 +87,12 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	public void levelOrderTraverse() {
 		if (this.root == null)
 			return;
+		CollectionVisitor v = new CollectionVisitor();
 		Queue<BSTNode<T>> q = new LinkedList<BSTNode<T>>();
 		q.add(this.root);
 		while (!q.isEmpty()) {
 			BSTNode<T> current = q.remove();
-			current.visit();
+			v.visit(current.getData());
 			if (current.getLeft() != null)
 				q.add(current.getLeft());
 			if (current.getRight() != null)
@@ -100,44 +101,61 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	}
 
 	public void preOrderTraverse() {
-		preOrderTraverse(root);
+		CollectionVisitor v = new CollectionVisitor();
+		preOrderTraverse(root, v);
 	}
 
-	private void preOrderTraverse(BSTNode<T> root) {
+	private void preOrderTraverse(BSTNode<T> root, CollectionVisitor v) {
 		if (root == null)
 			return;
-		root.visit();
-		preOrderTraverse(root.getLeft());
-		preOrderTraverse(root.getRight());
+		v.visit(root.getData());
+		preOrderTraverse(root.getLeft(), v);
+		preOrderTraverse(root.getRight(), v);
 	}
 
 	public void inOrderTraverse() {
-		inOrderTraverse(root);
+		CollectionVisitor v = new CollectionVisitor();
+		inOrderTraverse(root, v);
 	}
 
-	private void inOrderTraverse(BSTNode<T> root) {
+	private void inOrderTraverse(BSTNode<T> root, CollectionVisitor v) {
 		if (root == null)
 			return;
-		inOrderTraverse(root.getLeft());
-		root.visit();
-		inOrderTraverse(root.getRight());
+		inOrderTraverse(root.getLeft(), v);
+		v.visit(root.getData());
+		inOrderTraverse(root.getRight(), v);
+	}
+
+	public BSTNode<T> inOrderNext(T data) {
+		CollectionVisitor v = new CollectionVisitor(data);
+		return inOrderNext(root, v);
+	}
+
+	private BSTNode<T> inOrderNext(BSTNode<T> root, CollectionVisitor v) {
+		if (root == null)
+			return null;
+		BSTNode<T> fn;
+		fn = inOrderNext(root.getLeft(), v);
+		if (fn != null) return fn;
+		if (v.getFcount() > 0) return root;
+		v.visit(root.getData());
+		fn = inOrderNext(root.getRight(), v);
+		return fn;
 	}
 
 	public void postOrderTraverse() {
-		postOrderTraverse(root);
+		CollectionVisitor v = new CollectionVisitor();
+		postOrderTraverse(root, v);
 	}
 
-	private void postOrderTraverse(BSTNode<T> root) {
+	private void postOrderTraverse(BSTNode<T> root, CollectionVisitor v) {
 		if (root == null)
 			return;
-		postOrderTraverse(root.getLeft());
-		postOrderTraverse(root.getRight());
-		root.visit();
+		postOrderTraverse(root.getLeft(), v);
+		postOrderTraverse(root.getRight(), v);
+		v.visit(root.getData());
 	}
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		BinarySearchTree<Integer> bsti = new BinarySearchTree<Integer>();
 		bsti.add(5);
@@ -178,12 +196,9 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		System.out.printf("remove j\n");
 		bsts.inOrderTraverse();
 
-		bsts.remove('x');
-		System.out.printf("remove x\n");
-		bsts.inOrderTraverse();
-		bsts.remove('d');
-		System.out.printf("remove d\n");
-		bsts.inOrderTraverse();
+		System.out.printf("inorder next(%s)=%s\n", 'i', bsts.inOrderNext('i').getData());
+		System.out.printf("inorder next(%s)=%s\n", 's', bsts.inOrderNext('s').getData());
+		System.out.printf("inorder next(%s)=%s\n", 'b', bsts.inOrderNext('b').getData());
 		bsts.remove('i');
 		System.out.printf("remove i\n");
 		bsts.inOrderTraverse();
